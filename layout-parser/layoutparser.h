@@ -17,6 +17,10 @@ private:
     QXmlStreamReader xml;
 
     void parseRoot();
+    void parseLayout();
+    void parseSection();
+    void parseRow();
+    void parseKey();
     void findRootElement();
     void readToEnd();
 };
