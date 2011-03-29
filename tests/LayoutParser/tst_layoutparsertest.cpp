@@ -53,11 +53,11 @@ void LayoutParserTest::testValidXML()
     QFETCH(QString, document);
 
     QByteArray data(document.toUtf8());
-    QScopedPointer<QBuffer> buffer(new QBuffer(&data));
+    const QScopedPointer<QBuffer> buffer(new QBuffer(&data));
     buffer->open(QIODevice::ReadOnly);
     LayoutParser parser(buffer.data());
 
-    bool result = parser.parse();
+    const bool result = parser.parse();
     if (!result)
         qDebug() << parser.errorString();
 
@@ -96,7 +96,7 @@ void LayoutParserTest::testInvalidXML()
     QFETCH(QByteArray, document);
     QFETCH(QString, error);
 
-    QScopedPointer<QBuffer> buffer(new QBuffer(&document));
+    const QScopedPointer<QBuffer> buffer(new QBuffer(&document));
     buffer->open(QIODevice::ReadOnly);
     LayoutParser parser(buffer.data());
 
@@ -154,11 +154,11 @@ void LayoutParserTest::testKeyboardAttributes()
     QFETCH(QString, catalog);
     QFETCH(bool, autocapitalization);
 
-    QScopedPointer<QBuffer> buffer(new QBuffer(&document));
+    const QScopedPointer<QBuffer> buffer(new QBuffer(&document));
     buffer->open(QIODevice::ReadOnly);
     LayoutParser parser(buffer.data());
 
-    bool result = parser.parse();
+    const bool result = parser.parse();
     if (!result)
         qDebug() << parser.errorString();
 
