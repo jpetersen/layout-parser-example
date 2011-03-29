@@ -1,9 +1,12 @@
 #include "keyboard.h"
 
-Keyboard::Keyboard(const QString &version, const QString &title, const QString &language)
+Keyboard::Keyboard(const QString &version, const QString &title, const QString &language,
+                   const QString &catalog, const bool autocapitalization)
     : mVersion(version.isEmpty() ? QString::fromLatin1("1.0") : version),
       mTitle(title),
-      mLanguage(language)
+      mLanguage(language),
+      mCatalog(catalog),
+      mAutocapitalization(autocapitalization)
 {
 }
 
@@ -24,4 +27,14 @@ const QString Keyboard::title() const
 const QString Keyboard::language() const
 {
     return mLanguage;
+}
+
+const QString Keyboard::catalog() const
+{
+    return mCatalog;
+}
+
+bool Keyboard::autocapitalization() const
+{
+    return mAutocapitalization;
 }

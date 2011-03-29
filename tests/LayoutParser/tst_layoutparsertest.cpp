@@ -105,33 +105,49 @@ void LayoutParserTest::testKeyboardAttributes_data()
     QTest::addColumn<QString>("version");
     QTest::addColumn<QString>("title");
     QTest::addColumn<QString>("language");
+    QTest::addColumn<QString>("catalog");
+    QTest::addColumn<bool>("autocapitalization");
 
     QTest::newRow("default") << std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?><keyboard/>")
                              << QString::fromLatin1("1.0")
                              << QString()
-                             << QString();
+                             << QString()
+                             << QString()
+                             << true;
     QTest::newRow("version") << std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?><keyboard version=\"3.4\"/>")
                              << QString::fromLatin1("3.4")
                              << QString()
-                             << QString();
+                             << QString()
+                             << QString()
+                             << true;
     QTest::newRow("title") << std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?><keyboard title=\"ATitle\"/>")
                            << QString::fromLatin1("1.0")
                            << QString::fromLatin1("ATitle")
-                           << QString();
+                           << QString()
+                           << QString()
+                           << true;
     QTest::newRow("language") << std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?><keyboard language=\"ALanguage\"/>")
                               << QString::fromLatin1("1.0")
                               << QString()
-                              << QString::fromLatin1("ALanguage");
+                              << QString::fromLatin1("ALanguage")
+                              << QString()
+                              << true;
     QTest::newRow("all") << std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?><keyboard version=\"3.4\" title=\"ATitle\" language=\"ALanguage\"/>")
                          << QString::fromLatin1("3.4")
                          << QString::fromLatin1("ATitle")
-                         << QString::fromLatin1("ALanguage");
+                         << QString::fromLatin1("ALanguage")
+                         << QString::fromLatin1("ACatalog")
+                         << false;
 }
 
 void LayoutParserTest::testKeyboardAttributes()
 {
     QFETCH(std::string, document);
     QFETCH(QString, version);
+    QFETCH(QString, title);
+    QFETCH(QString, language);
+    QFETCH(QString, catalog);
+    QFETCH(bool, autocapitalization);
 
     LayoutParser parser(QLatin1String(document.c_str()));
 
@@ -140,6 +156,10 @@ void LayoutParserTest::testKeyboardAttributes()
         qDebug() << parser.errorString();
 
     QCOMPARE(version, parser.keyboard()->version());
+    QCOMPARE(title, parser.keyboard()->title());
+    QCOMPARE(language, parser.keyboard()->language());
+    QCOMPARE(catalog, parser.keyboard()->catalog());
+    QCOMPARE(autocapitalization, parser.keyboard()->autocapitalization());
 }
 
 QTEST_MAIN(LayoutParserTest);

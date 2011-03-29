@@ -2,6 +2,23 @@
 
 #include <QDebug>
 
+namespace {
+    bool boolValue(const QStringRef &value, bool defaultValue) {
+        if (value.isEmpty())
+            return defaultValue;
+
+        if (value == QLatin1String("true") ||
+            value == QLatin1String("1"))
+            return true;
+
+        if (value == QLatin1String("false") ||
+            value == QLatin1String("0"))
+            return false;
+
+        return defaultValue;
+    }
+}
+
 LayoutParser::LayoutParser(const QLatin1String &data)
     : xml(data),
       mKeyboard()
@@ -45,8 +62,10 @@ void LayoutParser::parseKeyboard()
     const QString& version = attributes.value(QLatin1String("version")).toString();
     const QString& title = attributes.value(QLatin1String("title")).toString();
     const QString& language = attributes.value(QLatin1String("language")).toString();
+    const QString& catalog = attributes.value(QLatin1String("catalog")).toString();
+    const bool autocapitalization = boolValue(attributes.value(QLatin1String("autocapitalization")), true);
 
-    mKeyboard = QSharedPointer<Keyboard>(new Keyboard(version, title, language));
+    mKeyboard = QSharedPointer<Keyboard>(new Keyboard(version, title, language, catalog, autocapitalization));
 
     while (xml.readNextStartElement()) {
         if (xml.name() == QLatin1String("layout")) {
