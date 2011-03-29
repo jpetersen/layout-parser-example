@@ -16,7 +16,9 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    layoutparser.cpp
+    layoutparser.cpp \
+    keyboard.cpp
 
 HEADERS += \
-    layoutparser.h
+    layoutparser.h \
+    keyboard.h

@@ -14,7 +14,8 @@ TEMPLATE = app
 
 
 SOURCES += tst_layoutparsertest.cpp \
-    ../../layout-parser/layoutparser.cpp
+    ../../layout-parser/layoutparser.cpp \
+    ../../layout-parser/keyboard.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -22,4 +23,5 @@ INCLUDEPATH += \
     ../../layout-parser
 
 HEADERS += \
-    ../../layout-parser/layoutparser.h
+    ../../layout-parser/layoutparser.h \
+    ../../layout-parser/keyboard.h

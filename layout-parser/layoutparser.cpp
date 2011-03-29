@@ -3,7 +3,8 @@
 #include <QDebug>
 
 LayoutParser::LayoutParser(const QLatin1String &data)
-    : xml(data)
+    : xml(data),
+      mKeyboard()
 {
 }
 
@@ -40,7 +41,12 @@ void LayoutParser::parseKeyboard()
         xml.raiseError(QString(QLatin1String("Expected '<keyboard>', but got '<%1>'.")).arg(xml.name().toString()));
     }
 
+    const QXmlStreamAttributes& attributes = xml.attributes();
+    const QString& version = attributes.value(QLatin1String("version")).toString();
+    const QString& title = attributes.value(QLatin1String("title")).toString();
+    const QString& language = attributes.value(QLatin1String("language")).toString();
 
+    mKeyboard = QSharedPointer<Keyboard>(new Keyboard(version, title, language));
 
     while (xml.readNextStartElement()) {
         if (xml.name() == QLatin1String("layout")) {
@@ -122,3 +128,7 @@ const QString LayoutParser::errorString() const
     return xml.errorString();
 }
 
+const QSharedPointer<Keyboard> LayoutParser::keyboard() const
+{
+    return mKeyboard;
+}

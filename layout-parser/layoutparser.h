@@ -3,6 +3,9 @@
 
 #include <QLatin1String>
 #include <QXmlStreamReader>
+#include <QSharedPointer>
+
+#include "keyboard.h"
 
 class LayoutParser
 {
@@ -13,10 +16,13 @@ public:
 
     const QString errorString() const;
 
+    const QSharedPointer<Keyboard> keyboard() const;
+
 private:
     QXmlStreamReader xml;
+    QSharedPointer<Keyboard> mKeyboard;
 
-    void parseRoot();
+    void parseKeyboard();
     void parseLayout();
     void parseSection();
     void parseRow();
