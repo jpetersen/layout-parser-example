@@ -1,7 +1,7 @@
 #ifndef LAYOUTPARSER_H
 #define LAYOUTPARSER_H
 
-#include <QLatin1String>
+#include <QIODevice>
 #include <QXmlStreamReader>
 #include <QSharedPointer>
 
@@ -10,7 +10,7 @@
 class LayoutParser
 {
 public:
-    explicit LayoutParser(const QLatin1String &data);
+    explicit LayoutParser(QIODevice *device);
 
     bool parse();
 

@@ -19,8 +19,8 @@ namespace {
     }
 }
 
-LayoutParser::LayoutParser(const QLatin1String &data)
-    : xml(data),
+LayoutParser::LayoutParser(QIODevice *device)
+    : xml(device),
       mKeyboard()
 {
 }
