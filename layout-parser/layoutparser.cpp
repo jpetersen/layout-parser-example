@@ -2,26 +2,11 @@
 
 #include <QDebug>
 
-namespace {
-    bool boolValue(const QStringRef &value, bool defaultValue) {
-        if (value.isEmpty())
-            return defaultValue;
-
-        if (value == QLatin1String("true") ||
-            value == QLatin1String("1"))
-            return true;
-
-        if (value == QLatin1String("false") ||
-            value == QLatin1String("0"))
-            return false;
-
-        return defaultValue;
-    }
-}
-
 LayoutParser::LayoutParser(QIODevice *device)
     : xml(device),
-      mKeyboard()
+      mKeyboard(),
+      mImports(),
+      mLayouts()
 {
 }
 
@@ -47,7 +32,15 @@ void LayoutParser::findRootElement()
             return;
     }
 
-    xml.raiseError(QLatin1String("Expected '<keyboard>'."));
+    Q_ASSERT(xml.hasError());
+}
+
+void LayoutParser::error(const QString &message)
+{
+    if (xml.hasError())
+        return;
+
+    xml.raiseError(message);
 }
 
 void LayoutParser::parseKeyboard()
@@ -55,7 +48,7 @@ void LayoutParser::parseKeyboard()
     Q_ASSERT(xml.isStartElement());
 
     if (!xml.isStartElement() || xml.name() != QLatin1String("keyboard")) {
-        xml.raiseError(QString(QLatin1String("Expected '<keyboard>', but got '<%1>'.")).arg(xml.name().toString()));
+        error(QString::fromLatin1("Expected '<keyboard>', but got '<%1>'.").arg(xml.name().toString()));
     }
 
     const QXmlStreamAttributes& attributes = xml.attributes();
@@ -68,14 +61,45 @@ void LayoutParser::parseKeyboard()
     mKeyboard = QSharedPointer<Keyboard>(new Keyboard(version, title, language, catalog, autocapitalization));
 
     while (xml.readNextStartElement()) {
-        if (xml.name() == QLatin1String("layout")) {
+        if (xml.name() == QLatin1String("import")) {
+            parseImport();
+        } else if (xml.name() == QLatin1String("layout")) {
             parseLayout();
-        } else if (xml.name() == QLatin1String("import")) {
-
         } else {
-            xml.raiseError(QString(QLatin1String("Expected '<layout>' or '<import>', but got '<%1>'.")).arg(xml.name().toString()));
+            error(QString::fromLatin1("Expected '<layout>' or '<import>', but got '<%1>'.").arg(xml.name().toString()));
         }
     }
+}
+
+bool LayoutParser::boolValue(const QStringRef &value, bool defaultValue) {
+    if (value.isEmpty())
+        return defaultValue;
+
+    if (value == QLatin1String("true") ||
+        value == QLatin1String("1"))
+        return true;
+
+    if (value == QLatin1String("false") ||
+        value == QLatin1String("0"))
+        return false;
+
+    error(QString::fromLatin1("Excpected 'true', 'false', '1' or '0', but got '%1'.").arg(value.toString()));
+
+    return defaultValue;
+}
+
+void LayoutParser::parseImport()
+{
+    Q_ASSERT(xml.isStartElement());
+    Q_ASSERT(xml.name() == QLatin1String("import"));
+
+    const QXmlStreamAttributes& attributes = xml.attributes();
+    const QString& file = attributes.value(QLatin1String("file")).toString();
+    if (!file.isEmpty()) {
+        mImports.append(file);
+    }
+
+    xml.skipCurrentElement();
 }
 
 void LayoutParser::parseLayout()
@@ -83,13 +107,50 @@ void LayoutParser::parseLayout()
     Q_ASSERT(xml.isStartElement());
     Q_ASSERT(xml.name() == QLatin1String("layout"));
 
+    static const QStringList typeValues(QString::fromLatin1("general,url,email,number,phonenumber,common").split(','));
+    static const QStringList orientationValues(QString::fromLatin1("landscape,portrait").split(','));
+
+    const Layout::LayoutType type = enumValue("type", typeValues, Layout::General);
+    const Layout::LayoutOrientation orientation = enumValue("orientation", orientationValues, Layout::Landscape);
+
+    mLayouts.append(QSharedPointer<Layout>(new Layout(type, orientation)));
+
+    bool foundSection = false;
+
     while (xml.readNextStartElement()) {
         if (xml.name() == QLatin1String("section")) {
+            foundSection = true;
             parseSection();
         } else {
-            xml.raiseError(QString(QLatin1String("Expected '<section>', but got '<%1>'.")).arg(xml.name().toString()));
+            error(QString::fromLatin1("Expected '<section>', but got '<%1>'.").arg(xml.name().toString()));
         }
     }
+
+    if (!foundSection)
+        error(QString::fromLatin1("Expected '<section>'."));
+}
+
+template <class E>
+E LayoutParser::enumValue(const char * const attribute, const QStringList &values, E defaultValue)
+{
+    if (xml.hasError())
+        return defaultValue;
+
+    const QXmlStreamAttributes& attributes = xml.attributes();
+    const QStringRef& value = attributes.value(QLatin1String(attribute));
+
+    if (value.isEmpty())
+        return defaultValue;
+
+    const int index = values.indexOf(value.toString());
+
+    if (index == -1) {
+        error(QString::fromLatin1("Expected one of '%1', but got '%2'.").arg(values.join("', '"), value.toString()));
+
+        return defaultValue;
+    }
+
+    return static_cast<E>(index);
 }
 
 void LayoutParser::parseSection()
@@ -101,7 +162,7 @@ void LayoutParser::parseSection()
         if (xml.name() == QLatin1String("row")) {
             parseRow();
         } else {
-            xml.raiseError(QString(QLatin1String("Expected '<row>', but got '<%1>'.")).arg(xml.name().toString()));
+            error(QString::fromLatin1("Expected '<row>', but got '<%1>'.").arg(xml.name().toString()));
         }
     }
 }
@@ -115,7 +176,7 @@ void LayoutParser::parseRow()
         if (xml.name() == QLatin1String("key")) {
             parseKey();
         } else {
-            xml.raiseError(QString(QLatin1String("Expected '<key>', but got '<%1>'.")).arg(xml.name().toString()));
+            error(QString::fromLatin1("Expected '<key>', but got '<%1>'.").arg(xml.name().toString()));
         }
     }
 }
@@ -130,7 +191,7 @@ void LayoutParser::parseKey()
             // parseBinding();
             xml.skipCurrentElement();
         } else {
-            xml.raiseError(QString(QLatin1String("Expected '<binding>', but got '<%1>'.")).arg(xml.name().toString()));
+            error(QString::fromLatin1("Expected '<binding>', but got '<%1>'.").arg(xml.name().toString()));
         }
     }
 }
@@ -150,4 +211,14 @@ const QString LayoutParser::errorString() const
 const QSharedPointer<Keyboard> LayoutParser::keyboard() const
 {
     return mKeyboard;
+}
+
+const QStringList LayoutParser::imports() const
+{
+    return mImports;
+}
+
+const QList<QSharedPointer<Layout> > LayoutParser::layouts() const
+{
+    return mLayouts;
 }

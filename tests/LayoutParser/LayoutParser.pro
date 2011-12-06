@@ -12,10 +12,10 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-
 SOURCES += tst_layoutparsertest.cpp \
     ../../layout-parser/layoutparser.cpp \
-    ../../layout-parser/keyboard.cpp
+    ../../layout-parser/keyboard.cpp \
+    ../../layout-parser/layout.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -24,4 +24,5 @@ INCLUDEPATH += \
 
 HEADERS += \
     ../../layout-parser/layoutparser.h \
-    ../../layout-parser/keyboard.h
+    ../../layout-parser/keyboard.h \
+    ../../layout-parser/layout.h

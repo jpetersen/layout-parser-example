@@ -14,11 +14,12 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-
 SOURCES += main.cpp \
     layoutparser.cpp \
-    keyboard.cpp
+    keyboard.cpp \
+    layout.cpp
 
 HEADERS += \
     layoutparser.h \
-    keyboard.h
+    keyboard.h \
+    layout.h

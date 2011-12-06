@@ -1,6 +1,7 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
+#include <QObject>
 #include <QString>
 
 class Keyboard
@@ -16,6 +17,8 @@ public:
     bool autocapitalization() const;
 
 private:
+    Q_DISABLE_COPY(Keyboard)
+
     const QString mVersion;
     const QString mTitle;
     const QString mLanguage;
